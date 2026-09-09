@@ -14,6 +14,7 @@ export function NavigationProgress() {
 
     useEffect(() => {
         // Reset on route change complete
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing progress UI with route changes
         setIsLoading(false);
         setProgress(0);
     }, [pathname, searchParams]);

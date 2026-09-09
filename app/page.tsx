@@ -425,7 +425,7 @@ export default function HomePage() {
                   <div className="text-primary-400 animate-pulse-glow inline-block px-2 py-0.5 rounded bg-primary-500/10 mb-2">[AGENT_INITIATED]</div>
                   <div className="text-neutral-300">$ certiflow-agent analyze-cloud-infra --scope=SOC2-CC6.1</div>
                   <div className="text-neutral-500">{">"} Accessing AWS Console via headless browser...</div>
-                  <div className="text-neutral-500">{">"} Verifying IAM Role "Compliance-Scanner-V4"</div>
+                  <div className="text-neutral-500">{">"} Verifying IAM Role &quot;Compliance-Scanner-V4&quot;</div>
                   <div className="text-success">{">"} SUCCESS: IAM Policy strictly enforces MFA (Policy-ID: p-09x8)</div>
                   <div className="text-neutral-500">{">"} Capturing cryptographically signed screenshot...</div>
                   <div className="text-primary-400">{">"} Uploading to Evidence Vault [Hash: 0x77ab...f2]</div>

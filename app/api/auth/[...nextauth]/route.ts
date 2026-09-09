@@ -82,8 +82,8 @@ export const authOptions: NextAuthOptions = {
         },
         async session({ session, token }) {
             if (session.user) {
-                (session.user as unknown as Record<string, unknown>).role = token.role;
-                (session.user as unknown as Record<string, unknown>).organization = token.organization;
+                session.user.role = token.role;
+                session.user.organization = token.organization;
             }
             return session;
         },

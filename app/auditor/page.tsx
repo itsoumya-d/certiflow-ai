@@ -17,8 +17,18 @@ import {
     Loader2
 } from "lucide-react";
 
+interface AuditorEvidenceItem {
+    id: string;
+    name: string;
+    framework: string;
+    controlId: string;
+    status: string;
+    collectedAt?: string;
+    riskLevel?: string;
+}
+
 export default function AuditorDashboard() {
-    const [evidence, setEvidence] = useState<any[]>([]);
+    const [evidence, setEvidence] = useState<AuditorEvidenceItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

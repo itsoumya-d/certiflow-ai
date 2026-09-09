@@ -2,7 +2,7 @@ import { AWSIntegration } from "./aws";
 import { Integration } from "./core";
 
 // Registry of available integrations
-export const AVAILABLE_INTEGRATIONS: Record<string, any> = {
+export const AVAILABLE_INTEGRATIONS: Record<string, new () => Integration> = {
     aws: AWSIntegration,
 };
 

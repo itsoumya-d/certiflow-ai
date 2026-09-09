@@ -26,6 +26,18 @@ import {
     Loader2,
 } from "lucide-react";
 
+interface EvidenceItem {
+    id: string;
+    type: string;
+    name: string;
+    description?: string;
+    framework: string;
+    controlId: string;
+    uploadedBy?: string;
+    status: string;
+    expiresAt?: string;
+}
+
 export default function EvidencePage() {
     const { success, error } = useToast();
     const [uploadModalOpen, setUploadModalOpen] = useState(false);
@@ -35,7 +47,7 @@ export default function EvidencePage() {
     const [dragActive, setDragActive] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [evidenceItems, setEvidenceItems] = useState<any[]>([]);
+    const [evidenceItems, setEvidenceItems] = useState<EvidenceItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchEvidence = async () => {
