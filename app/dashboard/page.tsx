@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
+import Link from "next/link";
 import AnimatedScoreRing from "@/components/AnimatedScoreRing";
 import { motion } from "framer-motion";
 import {
@@ -214,9 +215,9 @@ export default function DashboardPage() {
                     <div className="card">
                         <div className="card-header">
                             <h3 className="card-title">Active Frameworks</h3>
-                            <a href="/frameworks" className="btn btn-ghost btn-sm">
+                            <Link href="/frameworks" className="btn btn-ghost btn-sm">
                                 View All <ChevronRight size={14} />
-                            </a>
+                            </Link>
                         </div>
 
                         <div

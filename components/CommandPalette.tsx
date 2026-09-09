@@ -66,6 +66,7 @@ export function CommandPalette() {
     useEffect(() => {
         if (isOpen) {
             inputRef.current?.focus();
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting palette state when it opens
             setQuery("");
             setSelectedIndex(0);
         }

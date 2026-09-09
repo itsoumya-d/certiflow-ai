@@ -29,7 +29,7 @@ describe('/api/evidence', () => {
         it('should allow authenticated requests', async () => {
             mockGetServerSession.mockResolvedValue({
                 user: { email: 'test@example.com', role: 'user' },
-            } as any)
+            })
 
             expect(mockGetServerSession).toBeDefined()
         })
@@ -73,7 +73,7 @@ describe('/api/evidence', () => {
         it('should allow admin to delete evidence', async () => {
             mockGetServerSession.mockResolvedValue({
                 user: { email: 'admin@test.com', role: 'admin' },
-            } as any)
+            })
 
             const session = await mockGetServerSession()
             expect(session?.user?.role).toBe('admin')
@@ -82,7 +82,7 @@ describe('/api/evidence', () => {
         it('should deny non-admin from deleting evidence', async () => {
             mockGetServerSession.mockResolvedValue({
                 user: { email: 'user@test.com', role: 'user' },
-            } as any)
+            })
 
             const session = await mockGetServerSession()
             expect(session?.user?.role).not.toBe('admin')

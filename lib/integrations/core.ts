@@ -6,10 +6,10 @@ export interface Integration {
     logo: string;
     connected: boolean;
     lastSync?: Date;
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
 
     // Core methods
-    connect(credentials: Record<string, any>): Promise<boolean>;
+    connect(credentials: Record<string, unknown>): Promise<boolean>;
     disconnect(): Promise<boolean>;
     validateConfig(): Promise<boolean>;
 
@@ -22,9 +22,9 @@ export type IntegrationType = 'cloud' | 'version_control' | 'identity' | 'hr' | 
 export interface EvidenceResult {
     controlId: string;
     status: 'compliant' | 'non-compliant' | 'error';
-    rawEvidence: any;
+    rawEvidence: unknown;
     timestamp: Date;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 export abstract class BaseIntegration implements Integration {
@@ -34,7 +34,7 @@ export abstract class BaseIntegration implements Integration {
     logo: string;
     connected: boolean = false;
     lastSync?: Date;
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
 
     constructor(id: string, name: string, type: IntegrationType, logo: string) {
         this.id = id;
@@ -43,7 +43,7 @@ export abstract class BaseIntegration implements Integration {
         this.logo = logo;
     }
 
-    abstract connect(credentials: Record<string, any>): Promise<boolean>;
+    abstract connect(credentials: Record<string, unknown>): Promise<boolean>;
 
     async disconnect(): Promise<boolean> {
         this.connected = false;

@@ -1,3 +1,5 @@
+// next/jest ships as CommonJS, so this config must use require().
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const nextJest = require('next/jest')
 
 const createJestConfig = nextJest({

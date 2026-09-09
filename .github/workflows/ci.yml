@@ -6,17 +6,29 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22.x, 24.x]
+    env:
+      NEXTAUTH_SECRET: ci-secret-key-12345
+      NEXTAUTH_URL: http://localhost:3000
+      GEMINI_API_KEY: ci-placeholder-key
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
       - name: Install dependencies
@@ -29,7 +41,6 @@ jobs:
 
       - name: Run unit tests
         run: npm run test -- --passWithNoTests
-        env:
-          NEXTAUTH_SECRET: ci-secret-key-12345
-          NEXTAUTH_URL: http://localhost:3000
-          GEMINI_API_KEY: ci-placeholder-key
+
+      - name: Build
+        run: npm run build
