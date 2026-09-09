@@ -4,6 +4,7 @@
 
 > Stop manually chasing compliance evidence. Let AI agents do it for you — continuously.
 
+[![CI](https://github.com/itsoumya-d/certiflow-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/itsoumya-d/certiflow-ai/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
 [![Gemini AI](https://img.shields.io/badge/Gemini-AI-blue?logo=google)](https://ai.google.dev/)

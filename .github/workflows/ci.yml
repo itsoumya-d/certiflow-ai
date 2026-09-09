@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check & Lint
+        run: |
+          npx tsc --noEmit
+          npm run lint
+
+      - name: Run unit tests
+        run: npm run test -- --passWithNoTests
+        env:
+          NEXTAUTH_SECRET: ci-secret-key-12345
+          NEXTAUTH_URL: http://localhost:3000
+          GEMINI_API_KEY: ci-placeholder-key
