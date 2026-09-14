@@ -1,15 +1,18 @@
 # CertiFlow AI 🔐
 
-### Agentic GRC & Continuous Trust Platform
+### Autonomous GRC & Agent Telemetry Simulator *(Functional Prototype)*
 
-> Stop manually chasing compliance evidence. Let AI agents do it for you — continuously.
+> Stop manually chasing compliance evidence. Explore autonomous agent-driven compliance verification.
 
 [![CI](https://github.com/itsoumya-d/certiflow-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/itsoumya-d/certiflow-ai/actions/workflows/ci.yml)
+[![Maturity: Prototype Simulation](https://img.shields.io/badge/Maturity-Prototype%20Simulation-orange.svg)](#-architecture--simulation-boundaries)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
 [![Gemini AI](https://img.shields.io/badge/Gemini-AI-blue?logo=google)](https://ai.google.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+> [!NOTE]
+> **Architecture & Simulation Disclosure:** CertiFlow AI is an engineering prototype evaluating autonomous agentic compliance workflows. To allow zero-dependency local evaluation and immediate reviewer verification without requiring live enterprise AWS/Okta IAM credentials, the current workflows run against simulated cloud telemetry fixtures and an in-memory audit store.
 
 ---
 
@@ -85,7 +88,7 @@ githubBranchProtection // Verify branch protection rules
 oktaMfa                // Check Okta MFA policy configuration
 ```
 
-Each workflow runs autonomously using Gemini's Computer Use — the agent navigates, checks, and reports back without human intervention.
+Each workflow models autonomous Gemini agent navigation and telemetry evaluation. In this prototype build, checks execute against structured simulated cloud responses to demonstrate agent computer-use decision trees and automated evidence parsing deterministically.
 
 ---
 
