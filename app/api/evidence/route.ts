@@ -4,6 +4,7 @@ import { Session } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import fs from "fs";
 import path from "path";
+import { randomUUID } from "crypto";
 
 // Evidence upload metadata type
 interface EvidenceMetadata {
@@ -29,25 +30,60 @@ interface EvidenceMetadata {
 const DB_PATH = path.join(process.cwd(), "evidence.json");
 
 function loadEvidence(): Map<string, EvidenceMetadata> {
+    let data: string;
     try {
-        if (!fs.existsSync(DB_PATH)) {
-            return new Map();
-        }
-        const data = fs.readFileSync(DB_PATH, "utf-8");
-        const parsed = JSON.parse(data);
-        return new Map(parsed);
-    } catch (e) {
-        console.error("Failed to load evidence db:", e);
-        return new Map();
+        data = fs.readFileSync(DB_PATH, "utf-8");
+    } catch (error) {
+        // Only first use is empty. Permission/I/O errors must not erase old data.
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return new Map();
+        throw error;
     }
+
+    const parsed: unknown = JSON.parse(data);
+    if (!Array.isArray(parsed)) throw new Error("Invalid evidence store");
+    const store = new Map<string, EvidenceMetadata>();
+    for (const entry of parsed) {
+        if (!Array.isArray(entry) || entry.length !== 2 || typeof entry[0] !== "string"
+            || !entry[1] || typeof entry[1] !== "object" || Array.isArray(entry[1])
+            || entry[1].id !== entry[0] || store.has(entry[0])) {
+            throw new Error("Invalid evidence entry");
+        }
+        // Reject malformed records rather than silently replacing their bytes.
+        const record = entry[1];
+        for (const field of ["name", "description", "framework", "controlId", "type", "mimeType", "uploadedBy", "uploadedAt", "status"]) {
+            if (typeof record[field] !== "string") throw new Error("Invalid evidence metadata");
+        }
+        if (typeof record.size !== "number" || !Number.isFinite(record.size) || record.size < 0) {
+            throw new Error("Invalid evidence size");
+        }
+        store.set(entry[0], record);
+    }
+    return store;
 }
 
 function saveEvidence(store: Map<string, EvidenceMetadata>) {
+    const data = JSON.stringify(Array.from(store.entries()), null, 2);
+    // Same-directory rename leaves the previous file intact if writing fails.
+    // This is a single-process demo store, not cross-process transaction isolation.
+    const temporaryPath = `${DB_PATH}.${randomUUID()}.tmp`;
+    let temporaryWritten = false;
     try {
-        const data = JSON.stringify(Array.from(store.entries()), null, 2);
-        fs.writeFileSync(DB_PATH, data);
-    } catch (e) {
-        console.error("Failed to save evidence db:", e);
+        fs.writeFileSync(temporaryPath, data, { flag: "wx", mode: 0o600 });
+        temporaryWritten = true;
+        fs.renameSync(temporaryPath, DB_PATH);
+    } catch (error) {
+        // EEXIST from exclusive creation means the file is not ours.
+        // An EEXIST rename failure still needs to clean up our completed write.
+        if (temporaryWritten || (error as NodeJS.ErrnoException).code !== "EEXIST") {
+            try {
+                fs.unlinkSync(temporaryPath);
+            } catch (cleanupError) {
+                if ((cleanupError as NodeJS.ErrnoException).code !== "ENOENT") {
+                    console.error("Failed to clean up evidence temporary file:", cleanupError);
+                }
+            }
+        }
+        throw error;
     }
 }
 
@@ -69,16 +105,30 @@ export async function POST(request: NextRequest) {
         }
 
         const formData = await request.formData();
-        const file = formData.get("file") as File | null;
-        const name = formData.get("name") as string;
-        const description = formData.get("description") as string;
-        const framework = formData.get("framework") as string;
-        const controlId = formData.get("controlId") as string;
-        const type = formData.get("type") as EvidenceMetadata["type"];
+        const file = formData.get("file");
+        const name = formData.get("name");
+        const description = formData.get("description");
+        const framework = formData.get("framework");
+        const controlId = formData.get("controlId");
+        const type = formData.get("type");
 
         if (!file) {
             return NextResponse.json(
                 { error: "No file provided" },
+                { status: 400 }
+            );
+        }
+
+        // Multipart text fields can also contain Files. Reject malformed input
+        // before persistence so a successful upload cannot poison future reads.
+        if (typeof file === "string"
+            || (name !== null && typeof name !== "string")
+            || (description !== null && typeof description !== "string")
+            || (framework !== null && typeof framework !== "string")
+            || (controlId !== null && typeof controlId !== "string")
+            || (type !== null && typeof type !== "string")) {
+            return NextResponse.json(
+                { error: "Invalid evidence upload fields" },
                 { status: 400 }
             );
         }
@@ -115,7 +165,7 @@ export async function POST(request: NextRequest) {
             description: description || "",
             framework: framework || "SOC 2",
             controlId: controlId || "Unassigned",
-            type: type || "document",
+            type: (type as EvidenceMetadata["type"]) || "document",
             mimeType: file.type,
             size: file.size,
             uploadedBy: session.user.email || "unknown",
@@ -134,11 +184,10 @@ export async function POST(request: NextRequest) {
                 // Reload fresh state to minimize race conditions
                 let currentStore = loadEvidence();
                 const storedEvidence = currentStore.get(evidence.id);
-                if (storedEvidence) {
-                    storedEvidence.status = "analyzing";
-                    currentStore.set(evidence.id, storedEvidence);
-                    saveEvidence(currentStore);
-                }
+                if (!storedEvidence) return;
+                storedEvidence.status = "analyzing";
+                currentStore.set(evidence.id, storedEvidence);
+                saveEvidence(currentStore);
 
                 let contentToAnalyze = "";
 
@@ -150,7 +199,7 @@ export async function POST(request: NextRequest) {
 
                 // Call Gemini
                 const { analyzeDocument } = await import("@/lib/gemini");
-                const analysis = await analyzeDocument(contentToAnalyze, framework);
+                const analysis = await analyzeDocument(contentToAnalyze, evidence.framework);
 
                 // Update evidence with result
                 currentStore = loadEvidence(); // Reload again
@@ -167,12 +216,18 @@ export async function POST(request: NextRequest) {
                 }
             } catch (error) {
                 console.error("Async analysis failed:", error);
-                const currentStore = loadEvidence();
-                const failedEvidence = currentStore.get(evidence.id);
-                if (failedEvidence) {
-                    failedEvidence.status = "failed";
-                    currentStore.set(evidence.id, failedEvidence);
-                    saveEvidence(currentStore);
+                try {
+                    const currentStore = loadEvidence();
+                    const failedEvidence = currentStore.get(evidence.id);
+                    if (failedEvidence) {
+                        failedEvidence.status = "failed";
+                        currentStore.set(evidence.id, failedEvidence);
+                        saveEvidence(currentStore);
+                    }
+                } catch (persistenceError) {
+                    // Background work cannot change the upload response, but must
+                    // handle disk failures instead of rejecting an unobserved promise.
+                    console.error("Failed to persist analysis failure:", persistenceError);
                 }
             }
         })();
@@ -185,7 +240,7 @@ export async function POST(request: NextRequest) {
                 status: evidence.status,
                 uploadedAt: evidence.uploadedAt,
             },
-            message: "Evidence uploaded successfully. Analysis in progress.",
+            message: "Evidence uploaded successfully. Analysis requested.",
         });
     } catch (error) {
         console.error("Evidence upload error:", error);
