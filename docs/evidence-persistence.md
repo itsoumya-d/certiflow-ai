@@ -1,8 +1,9 @@
 # Evidence persistence and failure recovery
 
 The evidence API is a prototype JSON metadata store at `process.cwd()/evidence.json`.
-It does not persist uploaded file contents. Analysis runs as best-effort background
-work in the server process, not a durable job queue.
+It does not persist uploaded file contents. Supported text analysis is awaited inside the upload request, not a durable job queue.
+The response is withheld until analysis and its status-write attempts finish. Binary
+metadata stays unprocessed because content extraction is not implemented.
 
 ## Mutation contract
 
@@ -17,11 +18,12 @@ work in the server process, not a durable job queue.
   rejected with HTTP 400 before touching storage.
 - Failed initial upload persistence does not start analysis. The upload form keeps
   its selected file and fields for retry when the API reports failure.
-- Background status writes can fail after a successful upload. Failures are logged;
+- Analysis/status writes can fail before the upload response. Failures are logged;
   the route attempts to persist `failed`, and also catches failure of that attempt.
   A subsequent GET reports only the last successfully persisted state, which may
   remain `pending` or `analyzing`. There is no automatic restart recovery.
-- Authentication, admin-only deletion, and missing-record responses are unchanged.
+- Upload requires a user/admin role; authenticated auditors retain read access.
+  Deletion remains admin-only. No automatic verification or human sign-off is implemented.
 
 This is not a multi-process transaction protocol or a power-loss durability
 promise: there is no locking, database transaction, or filesystem `fsync` step.
@@ -39,7 +41,7 @@ npm test -- --runInBand __tests__/app/evidence-upload-retry.test.tsx
 
 The route tests invoke the actual POST, GET and DELETE handlers with synthetic
 sessions and documents, mocked Gemini analysis, and an isolated in-memory
-filesystem. They inject read, partial-write, rename and background status failures,
+filesystem. They inject read, partial-write, rename and awaited analysis/status failures,
 check unchanged previous bytes, retry uploads, and verify the new record with a
 fresh GET. They never touch the repository's evidence file or call Gemini.
 

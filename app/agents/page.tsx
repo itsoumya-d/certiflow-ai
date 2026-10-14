@@ -1,5 +1,6 @@
 "use client";
 
+import { HideFromAuditor } from "@/components/RoleGate";
 import Sidebar from "@/components/Sidebar";
 import { useToast } from "@/components/Toast";
 import {
@@ -592,6 +593,7 @@ export default function AgentsPage() {
                 </div>
 
                 {/* Quick Workflow Execution */}
+                <HideFromAuditor>
                 <div className="card" style={{ marginTop: "var(--space-6)" }}>
                     <div className="card-header">
                         <h3 className="card-title">Quick Verification Workflows</h3>
@@ -655,6 +657,7 @@ export default function AgentsPage() {
                     </div>
                 </div>
 
+                </HideFromAuditor>
                 {/* Agent Capabilities Info */}
                 <div className="card" style={{ marginTop: "var(--space-6)" }}>
                     <div className="card-header">

@@ -2,6 +2,8 @@ import { act, cleanup, fireEvent, render, screen, within } from '@testing-librar
 import EvidencePage from '@/app/evidence/page'
 import { ToastProvider } from '@/components/Toast'
 
+jest.mock('next-auth/react', () => ({useSession: () => ({data:{user:{role:'user'}},status:'authenticated'})}))
+
 // The upload screen is real; only unrelated navigation/authentication is isolated.
 jest.mock('@/components/Sidebar', () => ({
     __esModule: true,

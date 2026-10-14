@@ -52,7 +52,7 @@ export default function AuditorDashboard() {
     const totalEvidence = evidence.length;
     const verifiedEvidence = evidence.filter(e => e.status === 'verified').length;
     const readinessScore = totalEvidence > 0 ? Math.round((verifiedEvidence / totalEvidence) * 100) : 0;
-    const pendingReview = evidence.filter(e => e.status === 'pending' || e.status === 'analyzing').length;
+    const pendingReview = evidence.filter(e => e.status === 'review_required').length;
     const criticalGaps = evidence.filter(e => e.riskLevel === 'high').length; // Assuming riskLevel exists or default 0
 
     return (
@@ -178,7 +178,7 @@ export default function AuditorDashboard() {
                                             </div>
                                             <div className={`px-3 py-1 rounded-full text-xs font-medium border ${item.status === 'verified' ? 'border-green-800 text-green-400' : 'border-gray-700 text-gray-400'
                                                 }`}>
-                                                {item.status === 'verified' ? 'Verified' : 'Ready for Review'}
+                                                {{verified: 'Verified', review_required: 'Review Required', unprocessed: 'Analysis Unavailable', failed: 'Analysis Failed', analyzing: 'Analyzing', pending: 'Pending Analysis'}[item.status] || 'Unknown Status'}
                                             </div>
                                         </div>
                                     ))
