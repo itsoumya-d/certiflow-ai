@@ -68,6 +68,8 @@ describe('Evidence upload retry', () => {
         // The existing file picker is hidden, and the labels are not associated
         // with controls, so use its input type and the visible field values.
         const fileInput = container.querySelector<HTMLInputElement>('input[type="file"]')!
+        expect(fileInput.accept.split(',')).toEqual(['.pdf', '.png', '.jpg', '.jpeg', '.json', '.txt', '.csv', '.log', '.md'])
+        expect(screen.getByText('PDF, PNG, JPEG, JSON, TXT, CSV, LOG, MD (max 10MB)')).toBeInTheDocument()
         const nameInput = screen.getByPlaceholderText('e.g., AWS S3 Encryption Settings')
         const controlInput = screen.getByPlaceholderText('e.g., CC6.1')
         const frameworkSelect = screen.getByDisplayValue('SOC 2')

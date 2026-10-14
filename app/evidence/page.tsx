@@ -289,7 +289,7 @@ export default function EvidencePage() {
                                             ref={fileInputRef}
                                             onChange={handleFileSelect}
                                             style={{ display: "none" }}
-                                            accept=".pdf,.png,.jpg,.jpeg,.json,.txt,.csv"
+                                            accept=".pdf,.png,.jpg,.jpeg,.json,.txt,.csv,.log,.md"
                                         />
                                         <Upload size={32} color="var(--color-neutral-400)" style={{ margin: "0 auto var(--space-3)" }} />
                                         {selectedFile ? (
@@ -298,7 +298,7 @@ export default function EvidencePage() {
                                             <>
                                                 <p style={{ fontWeight: "var(--font-medium)" }}>Drop files here or click to upload</p>
                                                 <p style={{ fontSize: "var(--text-sm)", color: "var(--color-neutral-400)" }}>
-                                                    PDF, PNG, JPEG, JSON, TXT, CSV (max 10MB)
+                                                    PDF, PNG, JPEG, JSON, TXT, CSV, LOG, MD (max 10MB)
                                                 </p>
                                             </>
                                         )}
