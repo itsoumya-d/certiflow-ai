@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { HideFromAuditor } from "@/components/RoleGate";
 import Sidebar from "@/components/Sidebar";
 import { useToast } from "@/components/Toast";
 import { ExportButton } from "@/components/ExportButton";
@@ -212,13 +213,13 @@ export default function EvidencePage() {
                                 Manage and track compliance evidence across all frameworks
                             </p>
                         </div>
-                        <button
+                        <HideFromAuditor><button
                             className="btn btn-primary"
                             onClick={() => setUploadModalOpen(true)}
                         >
                             <Upload size={16} />
                             Upload Evidence
-                        </button>
+                        </button></HideFromAuditor>
                     </div>
                 </div>
 

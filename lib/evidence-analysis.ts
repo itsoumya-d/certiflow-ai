@@ -18,7 +18,7 @@ export type EvidenceAnalysis = z.infer<typeof evidenceAnalysisSchema>;
 export function evidenceFileKind(name: string, mime: string): "text" | "binary" | null {
     const extension = name.toLowerCase().split(".").pop();
     const text: Record<string, string[]> = {
-        txt: ["text/plain"], log: ["text/plain"], md: ["text/markdown", "text/plain", ""],
+        txt: ["text/plain"], log: ["text/plain", ""], md: ["text/markdown", "text/plain", ""],
         csv: ["text/csv", "application/vnd.ms-excel"], json: ["application/json"],
     };
     const binary: Record<string, string[]> = {
