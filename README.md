@@ -92,6 +92,12 @@ Each workflow models autonomous Gemini agent navigation and telemetry evaluation
 
 ---
 
+## Evidence failure recovery
+
+See [the metadata persistence contract and credential-free failure/retry demonstration](docs/evidence-persistence.md) for storage behavior, regression commands, and prototype limitations.
+
+---
+
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
