@@ -132,6 +132,8 @@ describe('Evidence upload retry', () => {
         expect(Array.from(retryPayload.entries())).toEqual(Array.from(firstPayload.entries()))
         expect(mockFetch.mock.calls[3]).toEqual(['/api/evidence'])
         expect(screen.getByRole('heading', { name: 'Upload Successful!' })).toBeVisible()
+        expect(screen.queryByText('Your evidence is being analyzed by AI...')).not.toBeInTheDocument()
+        expect(screen.getByText('Metadata registered. Check analysis status; human review is required.')).toBeVisible()
 
         const savedRow = within(screen.getByRole('table')).getByRole('row', {
             name: new RegExp(evidence.name),

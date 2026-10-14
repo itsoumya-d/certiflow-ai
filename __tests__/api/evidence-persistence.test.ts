@@ -122,7 +122,7 @@ describe('actual evidence route persistence', () => {
         await settleAnalysis()
         const fresh = await GET(request(created.id))
         expect(fresh.status).toBe(200)
-        expect((await fresh.json()).evidence).toMatchObject({ id: created.id, status: 'verified' })
+        expect((await fresh.json()).evidence).toMatchObject({ id: created.id, status: 'review_required' })
         expect((await (await GET(request())).json()).total).toBe(2)
     })
 
@@ -146,8 +146,8 @@ describe('actual evidence route persistence', () => {
         await settleAnalysis()
         expect(analyze).toHaveBeenCalledWith('Synthetic evidence', 'SOC 2')
         const found = await GET(request(body.evidence.id))
-        expect((await found.json()).evidence).toMatchObject({ status: 'verified', analysisResult: { summary: 'Synthetic analysis' } })
-        expect((await (await GET(new NextRequest('http://localhost/api/evidence?framework=SOC%202&status=verified'))).json()).total).toBe(1)
+        expect((await found.json()).evidence).toMatchObject({ status: 'review_required', analysisResult: { summary: 'Synthetic analysis' } })
+        expect((await (await GET(new NextRequest('http://localhost/api/evidence?framework=SOC%202&status=review_required'))).json()).total).toBe(1)
         expect((await (await DELETE(request(body.evidence.id))).json()).success).toBe(true)
         expect((await GET(request(body.evidence.id))).status).toBe(404)
         expect((await DELETE(request(body.evidence.id))).status).toBe(404)
@@ -203,7 +203,7 @@ describe('actual evidence route persistence', () => {
     it('does not expose a verified result when its replacement fails', async () => {
         rename.mockImplementation((from, to) => {
             const contents = files.get(String(from))!
-            if (contents.includes('"verified"')) throw diskError('ENOSPC')
+            if (contents.includes('"review_required"')) throw diskError('ENOSPC')
             files.set(String(to), contents)
             files.delete(String(from))
         })
@@ -279,5 +279,68 @@ describe('actual evidence route persistence', () => {
         expect((await (await GET(request(id))).json()).evidence.status).toBe('analyzing')
         expect(console.error).toHaveBeenCalledWith('Failed to persist analysis failure:', expect.any(Error))
         expect([...files.keys()]).toEqual([DB_PATH])
+    })
+})
+
+describe('evidence write authorization and truthful analysis', () => {
+    it.each(['auditor', undefined, 'unknown'])('denies role %s before parsing or side effects', async role => {
+        session.mockResolvedValue({user: {email: 'fixture@example.test', role}, expires: ''})
+        const req = uploadRequest()
+        const parse = jest.spyOn(req, 'formData')
+        expect((await POST(req)).status).toBe(403)
+        expect(parse).not.toHaveBeenCalled(); expect(read).not.toHaveBeenCalled(); expect(write).not.toHaveBeenCalled(); expect(analyze).not.toHaveBeenCalled()
+    })
+    it.each(['user', 'admin'])('allows the explicit writer role %s', async role => {
+        session.mockResolvedValue({user: {email: 'fixture@example.test', role}, expires: ''})
+        const response = await POST(uploadRequest()); expect(response.status).toBe(200)
+        const id = (await response.json()).evidence.id
+        const evidence = (await (await GET(request(id))).json()).evidence
+        expect(evidence.status).toBe('review_required')
+        expect(evidence.analysisResult.controlAssessments).toEqual(analysis.controls)
+        expect(evidence.analysisProvenance).toMatchObject({source: 'document-text', analyzer: 'gemini'})
+    })
+    it('keeps authenticated auditor reads and legacy bytes without certifying legacy analysis', async () => {
+        files.set(DB_PATH, originalBytes)
+        session.mockResolvedValue({user: {role: 'auditor'}, expires: ''})
+        const response = await GET(request(storedEvidence.id))
+        expect((await response.json()).evidence.status).toBe('review_required')
+        expect(files.get(DB_PATH)).toBe(originalBytes); expect(write).not.toHaveBeenCalled()
+    })
+    it.each([
+        ['payload.exe', 'application/octet-stream'], ['fake.md', 'application/x-msdownload'],
+        ['fake.pdf', 'text/plain'], ['fake.txt', 'application/pdf'],
+    ])('rejects unsupported/misleading %s %s before storage', async (name, mime) => {
+        expect((await POST(uploadRequest({file: new File(['test'], name, {type:mime})}))).status).toBe(415)
+        expect(read).not.toHaveBeenCalled(); expect(write).not.toHaveBeenCalled(); expect(analyze).not.toHaveBeenCalled()
+    })
+    it('rejects invalid evidence category and malformed multipart', async () => {
+        expect((await POST(uploadRequest({type:'administrator'}))).status).toBe(400)
+        expect((await POST(new NextRequest('http://localhost/api/evidence', {method:'POST',body:'not multipart'}))).status).toBe(400)
+        expect(write).not.toHaveBeenCalled(); expect(analyze).not.toHaveBeenCalled()
+    })
+    it('rejects empty and oversized files', async () => {
+        expect((await POST(uploadRequest({file:new File([], 'empty.txt',{type:'text/plain'})}))).status).toBe(400)
+        expect((await POST(uploadRequest({file:new File([new Uint8Array(10*1024*1024+1)], 'large.txt',{type:'text/plain'})}))).status).toBe(400)
+        expect(write).not.toHaveBeenCalled(); expect(analyze).not.toHaveBeenCalled()
+    })
+    it.each([['document.pdf','application/pdf'],['screen.png','image/png']])('registers binary %s without invented content analysis', async (name,mime) => {
+        const response=await POST(uploadRequest({file:new File(['synthetic binary'],name,{type:mime})}))
+        expect(response.status).toBe(200)
+        const id=(await response.json()).evidence.id
+        expect((await (await GET(request(id))).json()).evidence).toMatchObject({status:'unprocessed'})
+        expect(analyze).not.toHaveBeenCalled()
+    })
+    it.each(['high','medium','low'] as const)('never auto-verifies %s risk model output', async riskLevel => {
+        analyze.mockResolvedValue({...analysis,riskLevel,controls:[{...analysis.controls[0],status:'non-compliant'}]})
+        const id=(await (await POST(uploadRequest())).json()).evidence.id
+        const record=(await (await GET(request(id))).json()).evidence
+        expect(record.status).toBe('review_required'); expect(record.analysisResult.riskLevel).toBe(riskLevel)
+        expect(record.analysisResult.controlAssessments[0].status).toBe('non-compliant')
+    })
+    it.each([{}, {controls:[],summary:'x',riskLevel:'banana'}, {controls:[{id:'x'}],summary:'x',riskLevel:'low'}])('rejects malformed model output %#', async output => {
+        analyze.mockResolvedValue(output as typeof analysis)
+        const id=(await (await POST(uploadRequest())).json()).evidence.id
+        const record=(await (await GET(request(id))).json()).evidence
+        expect(record.status).toBe('failed'); expect(record.analysisResult).toBeUndefined()
     })
 })

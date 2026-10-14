@@ -130,3 +130,28 @@ New compliance workflows, bug fixes, UI improvements — open a PR. Let's build 
 MIT — see LICENSE for details.
 
 Built with ❤️ by [itsoumya-d](https://github.com/itsoumya-d) · Powered by Gemini AI
+
+### Evidence authorization and analysis boundaries
+
+Evidence creation and agent execution require an explicit `user` or `admin`
+role on the server. Auditors, missing roles and unknown roles cannot write;
+ordinary authenticated reads and admin-only deletion remain unchanged. This is
+role authorization for a shared demo store, not tenant isolation or production
+authentication hardening.
+
+Uploads require matching supported MIME/extension pairs: TXT/LOG, Markdown,
+CSV and JSON for text; PDF, PNG and JPEG for binary metadata. Unsupported formats,
+mismatches, invalid evidence categories, empty files, malformed multipart and
+files over 10 MiB are rejected. The demo stores metadata/analysis, not raw file
+bytes. Binary metadata stays `unprocessed`: no filename-based simulated analysis.
+
+Text analysis is awaited and validated at runtime. Successful model output is
+`review_required`, never automatically `verified`, regardless of risk or control
+assessment. Full control assessments and text-analysis provenance are preserved.
+Invalid/provider-failed results remain failed, subject to honest persistence
+failure handling. There is no implemented human sign-off workflow. Legacy
+`verified` records are presented as review-required on reads without rewriting
+historical stored bytes. The UI distinguishes review-required and unprocessed
+states. Storage remains single-process JSON, not transactional multi-tenant
+production storage; provider and binary extraction integrations are not exercised
+by provider-free regression tests.
