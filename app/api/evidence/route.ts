@@ -1,3 +1,4 @@
+import { evidenceAnalysisSchema, evidenceFileKind, type EvidenceAnalysis } from "@/lib/evidence-analysis";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
@@ -18,9 +19,11 @@ interface EvidenceMetadata {
     size: number;
     uploadedBy: string;
     uploadedAt: string;
-    status: "pending" | "analyzing" | "verified" | "failed";
+    status: "pending" | "unprocessed" | "analyzing" | "review_required" | "verified" | "failed";
+    analysisProvenance?: { source: "document-text"; analyzer: "gemini"; analyzedAt: string };
     analysisResult?: {
         controls: string[];
+        controlAssessments?: EvidenceAnalysis["controls"];
         riskLevel: "low" | "medium" | "high";
         summary: string;
     };
@@ -104,7 +107,13 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const formData = await request.formData();
+        const role = session.user.role;
+        if (role !== "admin" && role !== "user") {
+            return NextResponse.json({ error: "Evidence write access required" }, { status: 403 });
+        }
+        let formData: FormData;
+        try { formData = await request.formData(); }
+        catch { return NextResponse.json({ error: "Invalid multipart form" }, { status: 400 }); }
         const file = formData.get("file");
         const name = formData.get("name");
         const description = formData.get("description");
@@ -142,21 +151,12 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Validate file type
-        const allowedTypes = [
-            "application/pdf",
-            "image/png",
-            "image/jpeg",
-            "application/json",
-            "text/plain",
-            "text/csv",
-            "application/vnd.ms-excel",
-            "text/markdown"
-        ];
-        // Relaxed type check slightly for demo flexibility to allow .md
-        if (!allowedTypes.includes(file.type) && !file.name.endsWith('.md')) {
-            // Intentionally loose for demo
+        if (file.size === 0) return NextResponse.json({ error: "File is empty" }, { status: 400 });
+        if (type && !["document", "screenshot", "configuration", "log"].includes(type)) {
+            return NextResponse.json({ error: "Invalid evidence type" }, { status: 400 });
         }
+        const fileKind = evidenceFileKind(file.name, file.type);
+        if (!fileKind) return NextResponse.json({ error: "Unsupported file format or MIME/extension mismatch" }, { status: 415 });
 
         // Create evidence metadata
         const evidence: EvidenceMetadata = {
@@ -170,16 +170,18 @@ export async function POST(request: NextRequest) {
             size: file.size,
             uploadedBy: session.user.email || "unknown",
             uploadedAt: new Date().toISOString(),
-            status: "pending",
+            status: fileKind === "text" ? "pending" : "unprocessed",
         };
+
+        let resultStatus: EvidenceMetadata["status"] = evidence.status;
 
         // Store metadata
         const evidenceStore = loadEvidence();
         evidenceStore.set(evidence.id, evidence);
         saveEvidence(evidenceStore);
 
-        // Trigger async analysis 
-        (async () => {
+        // Await text analysis; never simulate content extraction for binary metadata.
+        if (fileKind === "text") await (async () => {
             try {
                 // Reload fresh state to minimize race conditions
                 let currentStore = loadEvidence();
@@ -188,31 +190,28 @@ export async function POST(request: NextRequest) {
                 storedEvidence.status = "analyzing";
                 currentStore.set(evidence.id, storedEvidence);
                 saveEvidence(currentStore);
+                resultStatus = "analyzing";
 
-                let contentToAnalyze = "";
-
-                if (file.type === "application/pdf" || file.type.startsWith("image/")) {
-                    contentToAnalyze = `[Binary File: ${file.name} (${file.type})] - Automated analysis of binary files requires the 'pdf-parse' package. Simulating analysis based on filename and type.`;
-                } else {
-                    contentToAnalyze = await file.text();
-                }
-
-                // Call Gemini
+                const contentToAnalyze = await file.text();
+                if (!contentToAnalyze.trim() || contentToAnalyze.includes("\0")) throw new Error("Invalid text evidence content");
                 const { analyzeDocument } = await import("@/lib/gemini");
-                const analysis = await analyzeDocument(contentToAnalyze, evidence.framework);
+                const analysis = evidenceAnalysisSchema.parse(await analyzeDocument(contentToAnalyze, evidence.framework));
 
                 // Update evidence with result
                 currentStore = loadEvidence(); // Reload again
                 const finalEvidence = currentStore.get(evidence.id);
                 if (finalEvidence) {
-                    finalEvidence.status = "verified";
+                    finalEvidence.status = "review_required";
+                    finalEvidence.analysisProvenance = { source: "document-text", analyzer: "gemini", analyzedAt: new Date().toISOString() };
                     finalEvidence.analysisResult = {
                         controls: analysis.controls.map(c => c.id),
+                        controlAssessments: analysis.controls,
                         riskLevel: analysis.riskLevel,
                         summary: analysis.summary
                     };
                     currentStore.set(evidence.id, finalEvidence);
                     saveEvidence(currentStore);
+                    resultStatus = "review_required";
                 }
             } catch (error) {
                 console.error("Async analysis failed:", error);
@@ -223,10 +222,11 @@ export async function POST(request: NextRequest) {
                         failedEvidence.status = "failed";
                         currentStore.set(evidence.id, failedEvidence);
                         saveEvidence(currentStore);
+                        resultStatus = "failed";
                     }
                 } catch (persistenceError) {
-                    // Background work cannot change the upload response, but must
-                    // handle disk failures instead of rejecting an unobserved promise.
+                    // Preserve the last confirmed state; failed persistence must not
+                    // be presented as a completed analysis or erase prior bytes.
                     console.error("Failed to persist analysis failure:", persistenceError);
                 }
             }
@@ -237,10 +237,10 @@ export async function POST(request: NextRequest) {
             evidence: {
                 id: evidence.id,
                 name: evidence.name,
-                status: evidence.status,
+                status: resultStatus,
                 uploadedAt: evidence.uploadedAt,
             },
-            message: "Evidence uploaded successfully. Analysis requested.",
+            message: fileKind === "text" ? "Evidence metadata registered. Analysis does not constitute human verification." : "Binary metadata registered without content analysis. File bytes are not retained by this demo endpoint.",
         });
     } catch (error) {
         console.error("Evidence upload error:", error);
@@ -278,11 +278,11 @@ export async function GET(request: NextRequest) {
                     { status: 404 }
                 );
             }
-            return NextResponse.json({ evidence });
+            return NextResponse.json({ evidence: evidence.status === "verified" ? { ...evidence, status: "review_required" } : evidence });
         }
 
         // List all evidence with optional filters
-        let evidenceList = Array.from(evidenceStore.values());
+        let evidenceList = Array.from(evidenceStore.values()).map(e => e.status === "verified" ? { ...e, status: "review_required" as const } : e);
 
         if (framework) {
             evidenceList = evidenceList.filter((e) => e.framework === framework);

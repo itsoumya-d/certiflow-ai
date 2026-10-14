@@ -81,7 +81,7 @@ export default function EvidencePage() {
         { label: "Total Evidence", value: evidenceItems.length.toString(), icon: FolderOpen },
         { label: "Auto-Collected", value: evidenceItems.filter(e => e.uploadedBy === 'AI Agent' || e.uploadedBy === 'unknown').length.toString(), icon: Bot },
         { label: "Verified", value: evidenceItems.filter(e => e.status === 'verified').length.toString(), icon: CheckCircle2 },
-        { label: "Pending Review", value: evidenceItems.filter(e => e.status === 'pending' || e.status === 'analyzing').length.toString(), icon: Clock },
+        { label: "Pending Review", value: evidenceItems.filter(e => ['pending', 'analyzing', 'review_required', 'unprocessed'].includes(e.status)).length.toString(), icon: Clock },
     ];
 
     const [formData, setFormData] = useState({
@@ -140,7 +140,7 @@ export default function EvidencePage() {
 
             if (response.ok) {
                 setUploadSuccess(true);
-                success("Evidence uploaded successfully! AI analysis in progress.");
+                success("Evidence metadata registered. Check its analysis status; human review is required.");
                 setTimeout(() => {
                     setUploadModalOpen(false);
                     setUploadSuccess(false);
@@ -183,6 +183,14 @@ export default function EvidencePage() {
         switch (status) {
             case "verified":
                 return <span className="badge badge-success">Verified</span>;
+            case "review_required":
+                return <span className="badge badge-warning">Human Review Required</span>;
+            case "unprocessed":
+                return <span className="badge">Not Analyzed</span>;
+            case "analyzing":
+                return <span className="badge badge-warning">Analyzing</span>;
+            case "failed":
+                return <span className="badge badge-error">Analysis Failed</span>;
             case "pending":
                 return <span className="badge badge-warning">Pending</span>;
             case "expiring":
@@ -252,7 +260,7 @@ export default function EvidencePage() {
                                     <CheckCircle2 size={48} color="var(--color-success)" style={{ margin: "0 auto var(--space-4)" }} />
                                     <h4>Upload Successful!</h4>
                                     <p style={{ color: "var(--color-neutral-400)", fontSize: "var(--text-sm)" }}>
-                                        Your evidence is being analyzed by AI...
+                                        Metadata registered. Check analysis status; human review is required.
                                     </p>
                                 </div>
                             ) : (

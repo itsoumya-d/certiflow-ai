@@ -1,3 +1,4 @@
+import { evidenceAnalysisSchema } from "./evidence-analysis";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Initialize the Gemini client
@@ -62,7 +63,7 @@ Respond in JSON format:
         // Extract JSON from response
         const jsonMatch = response.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-            return JSON.parse(jsonMatch[0]);
+            return evidenceAnalysisSchema.parse(JSON.parse(jsonMatch[0]));
         }
 
         throw new Error("Failed to parse response");
