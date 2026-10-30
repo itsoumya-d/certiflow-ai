@@ -1,4 +1,5 @@
 import { evidenceAnalysisSchema, evidenceFileKind, type EvidenceAnalysis } from "@/lib/evidence-analysis";
+import { buildEvidenceManifest } from "@/lib/evidence-manifest";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
@@ -268,6 +269,29 @@ export async function GET(request: NextRequest) {
         const id = searchParams.get("id");
         const framework = searchParams.get("framework");
         const status = searchParams.get("status");
+        const format = searchParams.get("format");
+
+        if (format === "manifest" || format === "oscal") {
+            const built = buildEvidenceManifest(Array.from(evidenceStore.values()));
+            if (!built.verification.valid) {
+                return NextResponse.json(
+                    { error: "Evidence ledger verification failed" },
+                    { status: 500 }
+                );
+            }
+            if (format === "oscal") {
+                return NextResponse.json(built.oscal, {
+                    headers: {
+                        "Content-Disposition": 'attachment; filename="certiflow-oscal-assessment-results.json"',
+                    },
+                });
+            }
+            return NextResponse.json({
+                manifest: built.manifest,
+                verification: built.verification,
+                oscal: { available: true, endpoint: "/api/evidence?format=oscal" },
+            });
+        }
 
         if (id) {
             // Get specific evidence
