@@ -181,6 +181,7 @@ CertiFlow includes pluggable regulatory and compliance jurisdiction packs under 
 | Jurisdiction | Country | Standards Covered | Rules as of | Status |
 |---|---|---|---|---|
 | `CA` | Canada | PIPEDA Principle 7, CRA Memo 15.1, CCCS ITSG-33, TBS ADM | 2026-11-27 | Active |
+| `IN` | India | DPDP Act 2023 Sec 8 & 9, CERT-In Directions 2022, RBI IT Gov 2023 | 2026-11-27 | Active |
 
 ### Canadian (CA) Regulatory Rules
 
@@ -188,6 +189,13 @@ CertiFlow includes pluggable regulatory and compliance jurisdiction packs under 
 - **CA-CRA-GST-001**: CRA GST/HST Invoicing Documentation Threshold (CRA Memorandum 15.1). Mandatory invoice recipient name and registration thresholds for transactions >= CAD 150.00. Source: [Canada Revenue Agency (CRA)](https://www.canada.ca/en/revenue-agency/services/forms-publications/publications/15-1/general-requirements-books-records.html).
 - **CA-CCCS-MFA-002**: CCCS Privileged Account Access Authentication (CCCS ITSG-33). Enforces multi-factor authentication (MFA) on all administrative sessions. Source: [Canadian Centre for Cyber Security (CCCS)](https://www.cyber.gc.ca/en/guidance/it-security-risk-management-lifecycle-approach-itsg-33).
 - **CA-TBS-ADM-001**: TBS Directive on Automated Decision-Making (ADM) Governance. Requires human oversight checkpoints for high-impact automated and algorithmic decisions. Source: [Treasury Board of Canada Secretariat (TBS)](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32592).
+
+### Indian (IN) Regulatory Rules
+
+- **IN-DPDP-SEC8-PII**: DPDP Act 2023 Section 8(5) - Technical & Organizational Security Safeguards. Mandates reasonable security safeguards and encryption at rest and in transit to prevent personal data breaches. Source: [Ministry of Electronics and Information Technology (MeitY)](https://www.meity.gov.in/writereaddata/files/Digital_Personal_Data_Protection_Act_2023.pdf).
+- **IN-DPDP-SEC9-CHILD**: DPDP Act 2023 Section 9 - Additional Obligations in Relation to Children. Prohibits behavioral monitoring, tracking, or targeted advertising directed at children, and requires verifiable parental consent. Source: [Ministry of Electronics and Information Technology (MeitY)](https://www.meity.gov.in/writereaddata/files/Digital_Personal_Data_Protection_Act_2023.pdf).
+- **IN-CERTIN-DIR2022-LOGS**: CERT-In Cyber Security Directions (No. 20(3)/2022-CERT-In) Section 2(v). Mandates that corporate entities maintain system and audit logs securely within India for a rolling 180-day period. Source: [Indian Computer Emergency Response Team (CERT-In)](https://www.cert-in.org.in/PDF/CERT-In_Directions_70B_28.04.2022.pdf).
+- **IN-RBI-ITGOV-2023-AI**: Reserve Bank of India Master Direction - IT Governance, Risk, Controls and Assurance Practices (2023). Requires model explainability, verifiable audit trails, and human oversight for high-risk automated decision systems. Source: [Reserve Bank of India (RBI)](https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12562).
 
 > **Disclaimer**: Not legal or tax advice - check the official source.
 
