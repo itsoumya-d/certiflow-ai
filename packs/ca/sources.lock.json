@@ -1,0 +1,32 @@
+{
+  "jurisdiction": "CA",
+  "country_name": "Canada",
+  "generated_at": "2026-11-27T12:00:00Z",
+  "disclaimer": "Not legal or tax advice - check the official source.",
+  "sources": [
+    {
+      "rule_id": "CA-PIPEDA-007",
+      "authority": "Office of the Privacy Commissioner of Canada (OPC)",
+      "url": "https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/p_principle/principles/#p7",
+      "accessed_on": "2026-11-27"
+    },
+    {
+      "rule_id": "CA-CRA-GST-001",
+      "authority": "Canada Revenue Agency (CRA)",
+      "url": "https://www.canada.ca/en/revenue-agency/services/forms-publications/publications/15-1/general-requirements-books-records.html",
+      "accessed_on": "2026-11-27"
+    },
+    {
+      "rule_id": "CA-CCCS-MFA-002",
+      "authority": "Canadian Centre for Cyber Security (CCCS)",
+      "url": "https://www.cyber.gc.ca/en/guidance/it-security-risk-management-lifecycle-approach-itsg-33",
+      "accessed_on": "2026-11-27"
+    },
+    {
+      "rule_id": "CA-TBS-ADM-001",
+      "authority": "Treasury Board of Canada Secretariat (TBS)",
+      "url": "https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32592",
+      "accessed_on": "2026-11-27"
+    }
+  ]
+}

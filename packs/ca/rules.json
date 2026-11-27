@@ -1,0 +1,61 @@
+[
+  {
+    "id": "CA-PIPEDA-007",
+    "name": "Personal Information Protection - Security Safeguards",
+    "jurisdiction": "CA",
+    "standard": "PIPEDA Principle 7",
+    "what_it_decides": "Mandates that personal identifiable information (PII) must be protected by security safeguards appropriate to the sensitivity of the information, including end-to-end encryption at rest and in transit.",
+    "values": {
+      "requires_encryption_at_rest": true,
+      "requires_encryption_in_transit": true,
+      "minimum_tls_version": "1.3",
+      "minimum_aes_bits": 256
+    },
+    "source_url": "https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/p_principle/principles/#p7",
+    "checked_on": "2026-11-27"
+  },
+  {
+    "id": "CA-CRA-GST-001",
+    "name": "CRA GST/HST Invoicing Documentation Threshold",
+    "jurisdiction": "CA",
+    "standard": "CRA Memorandum 15.1",
+    "what_it_decides": "Determines mandatory invoice detail thresholds: commercial transactions of CAD 150.00 or higher require recipient/buyer legal name and full address for input tax credit (ITC) validity.",
+    "values": {
+      "currency": "CAD",
+      "threshold_amount": 150.00,
+      "requires_buyer_name_above_threshold": true,
+      "requires_gst_registration_number": true
+    },
+    "source_url": "https://www.canada.ca/en/revenue-agency/services/forms-publications/publications/15-1/general-requirements-books-records.html",
+    "checked_on": "2026-11-27"
+  },
+  {
+    "id": "CA-CCCS-MFA-002",
+    "name": "CCCS Privileged Account Access Authentication",
+    "jurisdiction": "CA",
+    "standard": "CCCS ITSG-33 / ITSP.30.031",
+    "what_it_decides": "Requires multi-factor authentication (MFA) with FIPS 140 validated cryptographic tokens for all administrative, developer, and privileged account sessions accessing financial or sensitive client ledgers.",
+    "values": {
+      "requires_mfa": true,
+      "session_inactivity_timeout_minutes": 15,
+      "password_min_length": 16,
+      "fips_compliance_required": true
+    },
+    "source_url": "https://www.cyber.gc.ca/en/guidance/it-security-risk-management-lifecycle-approach-itsg-33",
+    "checked_on": "2026-11-27"
+  },
+  {
+    "id": "CA-TBS-ADM-001",
+    "name": "TBS Directive on Automated Decision-Making (ADM) Governance",
+    "jurisdiction": "CA",
+    "standard": "TBS Directive on Automated Decision-Making",
+    "what_it_decides": "Requires explicit human-in-the-loop audit checkpoints and explainability disclosures for high-impact algorithmic, scoring, and automated account actions.",
+    "values": {
+      "requires_human_oversight_high_impact": true,
+      "requires_algorithmic_impact_assessment": true,
+      "explanation_delivery_deadline_days": 30
+    },
+    "source_url": "https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32592",
+    "checked_on": "2026-11-27"
+  }
+]

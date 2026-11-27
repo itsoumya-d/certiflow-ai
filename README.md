@@ -173,3 +173,21 @@ historical stored bytes. The UI distinguishes review-required and unprocessed
 states. Storage remains single-process JSON, not transactional multi-tenant
 production storage; provider and binary extraction integrations are not exercised
 by provider-free regression tests.
+
+## Regulatory Country Packs
+
+CertiFlow includes pluggable regulatory and compliance jurisdiction packs under `packs/<country>/rules.json` with cryptographic source tracking in `sources.lock.json`.
+
+| Jurisdiction | Country | Standards Covered | Rules as of | Status |
+|---|---|---|---|---|
+| `CA` | Canada | PIPEDA Principle 7, CRA Memo 15.1, CCCS ITSG-33, TBS ADM | 2026-11-27 | Active |
+
+### Canadian (CA) Regulatory Rules
+
+- **CA-PIPEDA-007**: Personal Information Protection - Security Safeguards (PIPEDA Principle 7). Mandates encryption at rest and in transit for sensitive customer personal information. Source: [Office of the Privacy Commissioner of Canada (OPC)](https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/p_principle/principles/#p7).
+- **CA-CRA-GST-001**: CRA GST/HST Invoicing Documentation Threshold (CRA Memorandum 15.1). Mandatory invoice recipient name and registration thresholds for transactions >= CAD 150.00. Source: [Canada Revenue Agency (CRA)](https://www.canada.ca/en/revenue-agency/services/forms-publications/publications/15-1/general-requirements-books-records.html).
+- **CA-CCCS-MFA-002**: CCCS Privileged Account Access Authentication (CCCS ITSG-33). Enforces multi-factor authentication (MFA) on all administrative sessions. Source: [Canadian Centre for Cyber Security (CCCS)](https://www.cyber.gc.ca/en/guidance/it-security-risk-management-lifecycle-approach-itsg-33).
+- **CA-TBS-ADM-001**: TBS Directive on Automated Decision-Making (ADM) Governance. Requires human oversight checkpoints for high-impact automated and algorithmic decisions. Source: [Treasury Board of Canada Secretariat (TBS)](https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32592).
+
+> **Disclaimer**: Not legal or tax advice - check the official source.
+
