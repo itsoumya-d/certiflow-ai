@@ -7,7 +7,7 @@ export interface CountryRule {
   jurisdiction: string;
   standard: string;
   what_it_decides: string;
-  values: Record<string, any>;
+  values: Record<string, unknown>;
   source_url: string;
   checked_on: string;
 }
@@ -38,8 +38,9 @@ export function loadCountryPack(country: string = 'ca', customBaseDir?: string):
   let rules: CountryRule[];
   try {
     rules = JSON.parse(raw);
-  } catch (err: any) {
-    throw new Error(`Failed to parse rules JSON for country '${norm}': ${err.message}`);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Failed to parse rules JSON for country '${norm}': ${msg}`);
   }
 
   if (!Array.isArray(rules) || rules.length === 0) {
@@ -64,7 +65,7 @@ export function loadCountryPack(country: string = 'ca', customBaseDir?: string):
 
 export function evaluateCompliancePolicy(
   action: string,
-  payload: any,
+  payload: Record<string, unknown>,
   country: string = 'ca',
   options?: { packsDir?: string }
 ): ComplianceEvaluationResult {
@@ -87,9 +88,10 @@ export function evaluateCompliancePolicy(
   if (action === 'issue_invoice') {
     const craRule = rules.find((r) => r.id === 'CA-CRA-GST-001');
     if (craRule) {
-      const amount = payload.amountCAD || 0;
-      const threshold = craRule.values.threshold_amount || 150.0;
-      if (amount >= threshold && (!payload.buyerName || payload.buyerName.trim() === '')) {
+      const amount = typeof payload.amountCAD === 'number' ? payload.amountCAD : 0;
+      const threshold = typeof craRule.values.threshold_amount === 'number' ? craRule.values.threshold_amount : 150.0;
+      const buyerName = typeof payload.buyerName === 'string' ? payload.buyerName.trim() : '';
+      if (amount >= threshold && !buyerName) {
         return {
           approved: false,
           ruleId: craRule.id,
