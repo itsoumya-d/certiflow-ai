@@ -98,6 +98,24 @@ See [the metadata persistence contract and credential-free failure/retry demonst
 
 ---
 
+## ⚡ Performance Benchmarks & Engine Evaluation
+
+Automated cryptographic ledger, audit trail, and AI governance throughput benchmarks ([results/2026-11-27.md](results/2026-11-27.md)):
+
+| Benchmark Suite | Iterations | Total Time (ms) | Avg Latency (ms/op) | Throughput (ops/sec) |
+|---|---|---|---|---|
+| Merkle Ledger Append & Root Calculation | 1,000 | 50.02 ms | 0.0500 ms | 19,994 ops/s |
+| Merkle Inclusion Proof Verification | 500 | 185.48 ms | 0.3710 ms | 2,696 ops/s |
+| Inference Spend Governance & Budget Check | 1,000 | 97.49 ms | 0.0975 ms | 10,257 ops/s |
+| Canonical JSON Serialization & SHA-256 Hashing | 2,000 | 96.52 ms | 0.0483 ms | 20,722 ops/s |
+
+Run locally:
+```bash
+npm test -- __tests__/lib/benchmark.test.ts
+```
+
+---
+
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
