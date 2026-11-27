@@ -1,0 +1,60 @@
+[
+  {
+    "id": "IN-DPDP-SEC8-PII",
+    "name": "DPDP Act 2023 Section 8 - Technical & Organizational Security Safeguards",
+    "jurisdiction": "IN",
+    "standard": "Digital Personal Data Protection Act 2023, Section 8(5)",
+    "what_it_decides": "Mandates that data fiduciaries implement reasonable security safeguards including end-to-end encryption at rest and in transit to prevent personal data breaches.",
+    "values": {
+      "requires_encryption_at_rest": true,
+      "requires_encryption_in_transit": true,
+      "minimum_aes_bits": 256,
+      "minimum_tls_version": "1.3"
+    },
+    "source_url": "https://www.meity.gov.in/writereaddata/files/Digital_Personal_Data_Protection_Act_2023.pdf",
+    "checked_on": "2026-11-27"
+  },
+  {
+    "id": "IN-DPDP-SEC9-CHILD",
+    "name": "DPDP Act 2023 Section 9 - Additional Obligations in Relation to Children",
+    "jurisdiction": "IN",
+    "standard": "Digital Personal Data Protection Act 2023, Section 9(1)-(3)",
+    "what_it_decides": "Prohibits tracking, behavioral monitoring, or targeted advertising directed at children, and requires verifiable parental consent before processing child personal data.",
+    "values": {
+      "prohibit_tracking": true,
+      "prohibit_behavioral_monitoring": true,
+      "prohibit_targeted_advertising": true,
+      "requires_verifiable_parental_consent": true
+    },
+    "source_url": "https://www.meity.gov.in/writereaddata/files/Digital_Personal_Data_Protection_Act_2023.pdf",
+    "checked_on": "2026-11-27"
+  },
+  {
+    "id": "IN-CERTIN-DIR2022-LOGS",
+    "name": "CERT-In Directions 2022 - Mandatory 180-Day System and Audit Log Retention",
+    "jurisdiction": "IN",
+    "standard": "CERT-In Cyber Security Directions (No. 20(3)/2022-CERT-In) Section 2(v)",
+    "what_it_decides": "Mandates that all service providers, intermediaries, and corporate entities maintain system and security audit logs securely within the Indian jurisdiction for a rolling 180-day period.",
+    "values": {
+      "min_retention_days": 180,
+      "requires_secure_storage": true,
+      "jurisdiction_storage": "IN"
+    },
+    "source_url": "https://www.cert-in.org.in/PDF/CERT-In_Directions_70B_28.04.2022.pdf",
+    "checked_on": "2026-11-27"
+  },
+  {
+    "id": "IN-RBI-ITGOV-2023-AI",
+    "name": "RBI Master Direction on Information Technology Governance and Controls 2023",
+    "jurisdiction": "IN",
+    "standard": "Reserve Bank of India Master Direction - IT Governance, Risk, Controls and Assurance Practices (2023)",
+    "what_it_decides": "Requires financial and risk-scoring systems to maintain model explainability, verifiable audit trails, and human oversight for high-risk automated lending or underwriting decisions.",
+    "values": {
+      "requires_model_explainability": true,
+      "requires_audit_trail": true,
+      "requires_human_oversight_for_high_risk": true
+    },
+    "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12562",
+    "checked_on": "2026-11-27"
+  }
+]

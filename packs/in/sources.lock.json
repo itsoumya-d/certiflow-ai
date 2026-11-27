@@ -1,0 +1,32 @@
+{
+  "jurisdiction": "IN",
+  "country_name": "India",
+  "generated_at": "2026-11-27T12:00:00Z",
+  "disclaimer": "Not legal or tax advice - check the official source.",
+  "sources": [
+    {
+      "rule_id": "IN-DPDP-SEC8-PII",
+      "authority": "Ministry of Electronics and Information Technology (MeitY)",
+      "url": "https://www.meity.gov.in/writereaddata/files/Digital_Personal_Data_Protection_Act_2023.pdf",
+      "accessed_on": "2026-11-27"
+    },
+    {
+      "rule_id": "IN-DPDP-SEC9-CHILD",
+      "authority": "Ministry of Electronics and Information Technology (MeitY)",
+      "url": "https://www.meity.gov.in/writereaddata/files/Digital_Personal_Data_Protection_Act_2023.pdf",
+      "accessed_on": "2026-11-27"
+    },
+    {
+      "rule_id": "IN-CERTIN-DIR2022-LOGS",
+      "authority": "Indian Computer Emergency Response Team (CERT-In)",
+      "url": "https://www.cert-in.org.in/PDF/CERT-In_Directions_70B_28.04.2022.pdf",
+      "accessed_on": "2026-11-27"
+    },
+    {
+      "rule_id": "IN-RBI-ITGOV-2023-AI",
+      "authority": "Reserve Bank of India (RBI)",
+      "url": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12562",
+      "accessed_on": "2026-11-27"
+    }
+  ]
+}
